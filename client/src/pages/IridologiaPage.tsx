@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { api } from '../api';
+import { SearchHero } from '../components/SearchHero';
 
 type IridTab = 'queixas' | 'jensen' | 'rayid' | 'padroes';
 
@@ -41,16 +42,19 @@ export function IridologiaPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-        <h2 style={{ margin: 0 }}>Iridologia</h2>
-        <input
-          type="search"
-          placeholder="Pesquisar área, padrão ou queixa..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          style={{ width: 300, maxWidth: '100%' }}
-        />
+      <div className="page-header">
+        <div>
+          <h2 className="page-title">Iridologia</h2>
+          <span className="page-subtitle">Queixas emocionais, áreas de Jensen, padrões e sobreposição de mapa</span>
+        </div>
       </div>
+
+      <SearchHero
+        value={busca}
+        onChange={setBusca}
+        placeholder="Pesquisar área iridológica, padrão, órgão ou queixa..."
+        countLabel={tab !== 'rayid' ? `${activeList.length} registros` : undefined}
+      />
 
       <div className="tabs">
         {([

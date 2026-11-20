@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { RotateCcw, Search } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { api } from '../api';
 import { ImagePointViewer } from '../components/ImagePointViewer';
+import { SearchHero } from '../components/SearchHero';
 
 type MtcTab =
   | 'sistemicos'
@@ -133,14 +134,29 @@ export function MtcPage() {
   const currentPicked = tab !== 'ryodoraku' ? (escolhidos[tab] ?? []) : [];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Topo Clínico: Queixas, Língua, Resíduos e Pesquisa (como no VB6) */}
-      <div className="card" style={{ padding: 14 }}>
-        <div className="field" style={{ marginBottom: 8 }}>
-          <label>Queixas</label>
-          <input value={queixas} onChange={(e) => setQueixas(e.target.value)} placeholder="Descreva as queixas principais do paciente..." />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div className="page-header">
+        <div>
+          <h2 className="page-title">MTC & Técnicas Terapêuticas</h2>
+          <span className="page-subtitle">Pesquise por sintoma, doença, meridiano ou código do ponto</span>
         </div>
-        <div className="grid-2" style={{ gap: 10, marginBottom: 10 }}>
+      </div>
+
+      {/* Busca Imponente */}
+      <SearchHero
+        value={busca}
+        onChange={setBusca}
+        placeholder="Buscar sintoma, doença ou ponto (ex: ansiedade, dor ombro, insônia, IG04)..."
+        countLabel={tab !== 'ryodoraku' ? `${activeList.length} resultados` : undefined}
+      />
+
+      {/* Registro Rápido de Consulta (Queixas, Língua, Resíduos) alinhado em 3 colunas */}
+      <div className="card" style={{ padding: '12px 16px' }}>
+        <div className="grid-3" style={{ gap: 12 }}>
+          <div className="field" style={{ marginBottom: 0 }}>
+            <label>Queixas</label>
+            <input value={queixas} onChange={(e) => setQueixas(e.target.value)} placeholder="Queixas principais..." />
+          </div>
           <div className="field" style={{ marginBottom: 0 }}>
             <label>Língua</label>
             <input value={lingua} onChange={(e) => setLingua(e.target.value)} placeholder="Aspecto, saburra, cor..." />
@@ -149,23 +165,6 @@ export function MtcPage() {
             <label>Resíduos e Fluidos</label>
             <input value={residuos} onChange={(e) => setResiduos(e.target.value)} placeholder="Urina, fezes, suor, mucos..." />
           </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
-          <Search size={16} color="var(--primary)" />
-          <input
-            type="search"
-            placeholder="Pesquisa (ex: ansiedade, dor ombro, cefaleia)..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            style={{
-              width: 380,
-              maxWidth: '100%',
-              textAlign: 'center',
-              fontWeight: 700,
-              color: '#b42318',
-              fontSize: 15,
-            }}
-          />
         </div>
       </div>
 

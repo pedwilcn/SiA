@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Calendar, MessageCircle, Plus, Save, Trash2, User, DollarSign, FileText } from 'lucide-react';
 import { api, buildWhatsAppUrl, generateAtendimentoPdf } from '../api';
+import { SearchHero } from '../components/SearchHero';
 
 export interface Cliente {
   id: number;
@@ -161,15 +162,22 @@ export function HomePage({ selectedCliente, onSelectCliente, onStartAtendimento 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+      <div className="page-header">
         <div>
-          <h2 style={{ margin: 0 }}>Home — Agenda, Pacientes & Financeiro</h2>
-          <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            {selectedCliente ? `Paciente selecionado: ${selectedCliente.nome}` : 'Selecione ou cadastre um paciente'}
+          <h2 className="page-title">Home — Agenda, Pacientes & Financeiro</h2>
+          <span className="page-subtitle">
+            {selectedCliente ? `Paciente selecionado: ${selectedCliente.nome}` : 'Selecione ou cadastre um paciente para iniciar'}
           </span>
         </div>
         {msg && <span className="badge">{msg}</span>}
       </div>
+
+      <SearchHero
+        value={busca}
+        onChange={setBusca}
+        placeholder="Buscar paciente por nome ou telefone..."
+        countLabel={`${clientes.length} pacientes`}
+      />
 
       <div className="grid-2">
         {/* Lista e Cadastro de Pacientes */}
@@ -189,14 +197,6 @@ export function HomePage({ selectedCliente, onSelectCliente, onStartAtendimento 
               )}
             </div>
           </div>
-
-          <input
-            type="search"
-            placeholder="Buscar paciente por nome ou telefone..."
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
-            style={{ width: '100%', marginBottom: 10 }}
-          />
 
           <div className="list-scroll" style={{ maxHeight: 200, marginBottom: 14 }}>
             {clientes.map((c) => (
@@ -287,10 +287,11 @@ export function HomePage({ selectedCliente, onSelectCliente, onStartAtendimento 
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {slots.map((s, idx) => (
-              <div key={s.slot} style={{ display: 'grid', gridTemplateColumns: '76px 1fr 125px auto auto', gap: 6, alignItems: 'center' }}>
+              <div key={s.slot} style={{ display: 'grid', gridTemplateColumns: '82px 1fr 132px 38px 38px', gap: 6, alignItems: 'center' }}>
                 <input
                   placeholder="08:00"
                   value={s.hora}
+                  className="tabular"
                   onChange={(e) => {
                     const copy = [...slots];
                     copy[idx] = { ...s, hora: e.target.value };
@@ -309,13 +310,14 @@ export function HomePage({ selectedCliente, onSelectCliente, onStartAtendimento 
                 <input
                   placeholder="Telefone"
                   value={s.telefone}
+                  className="tabular"
                   onChange={(e) => {
                     const copy = [...slots];
                     copy[idx] = { ...s, telefone: e.target.value };
                     setSlots(copy);
                   }}
                 />
-                <button type="button" className="btn" title="Salvar horário" onClick={() => handleSaveSlot(slots[idx])}>
+                <button type="button" className="btn" style={{ width: 38, padding: 0 }} title="Salvar horário" onClick={() => handleSaveSlot(slots[idx])}>
                   <Save size={14} />
                 </button>
                 {s.telefone ? (
@@ -328,12 +330,12 @@ export function HomePage({ selectedCliente, onSelectCliente, onStartAtendimento 
                     rel="noreferrer"
                     className="btn btn-whatsapp"
                     title="Confirmar via WhatsApp"
-                    style={{ textDecoration: 'none', padding: '8px 10px' }}
+                    style={{ textDecoration: 'none', width: 38, padding: 0 }}
                   >
                     <MessageCircle size={14} />
                   </a>
                 ) : (
-                  <span style={{ width: 34 }} />
+                  <span style={{ width: 38 }} />
                 )}
               </div>
             ))}
@@ -364,41 +366,58 @@ export function HomePage({ selectedCliente, onSelectCliente, onStartAtendimento 
               </button>
             )}
           </div>
-          <div className="grid-3">
-            <div className="field">
-              <label>Qtd. Sessões Acupuntura × Valor (R$)</label>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <input type="number" min={0} value={qtdAcup} onChange={(e) => setQtdAcup(Number(e.target.value))} style={{ width: 70 }} />
-                <input type="number" min={0} step="0.01" value={valAcup} onChange={(e) => setValAcup(Number(e.target.value))} style={{ flex: 1 }} />
+          <div className="grid-3" style={{ alignItems: 'end' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '84px 1fr', gap: 8 }}>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label>Qtd. Acup.</label>
+                <input type="number" min={0} className="tabular" value={qtdAcup} onChange={(e) => setQtdAcup(Number(e.target.value))} />
+              </div>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label>Valor Sessão (R$)</label>
+                <input type="number" min={0} step="0.01" className="tabular" value={valAcup} onChange={(e) => setValAcup(Number(e.target.value))} />
               </div>
             </div>
-            <div className="field">
-              <label>Qtd. Estética × Valor (R$)</label>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <input type="number" min={0} value={qtdEst} onChange={(e) => setQtdEst(Number(e.target.value))} style={{ width: 70 }} />
-                <input type="number" min={0} step="0.01" value={valEst} onChange={(e) => setValEst(Number(e.target.value))} style={{ flex: 1 }} />
+
+            <div style={{ display: 'grid', gridTemplateColumns: '84px 1fr', gap: 8 }}>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label>Qtd. Estét.</label>
+                <input type="number" min={0} className="tabular" value={qtdEst} onChange={(e) => setQtdEst(Number(e.target.value))} />
+              </div>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label>Valor Estét. (R$)</label>
+                <input type="number" min={0} step="0.01" className="tabular" value={valEst} onChange={(e) => setValEst(Number(e.target.value))} />
               </div>
             </div>
-            <div className="field">
-              <label>Florais + Frete + Multa (R$)</label>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <input type="number" min={0} step="0.01" value={valFlorais} onChange={(e) => setValFlorais(Number(e.target.value))} placeholder="Florais" />
-                <input type="number" min={0} step="0.01" value={frete} onChange={(e) => setFrete(Number(e.target.value))} placeholder="Frete" />
-                <input type="number" min={0} step="0.01" value={multa} onChange={(e) => setMulta(Number(e.target.value))} placeholder="Multa" />
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label>Florais (R$)</label>
+                <input type="number" min={0} step="0.01" className="tabular" value={valFlorais} onChange={(e) => setValFlorais(Number(e.target.value))} />
+              </div>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label>Frete (R$)</label>
+                <input type="number" min={0} step="0.01" className="tabular" value={frete} onChange={(e) => setFrete(Number(e.target.value))} />
+              </div>
+              <div className="field" style={{ marginBottom: 0 }}>
+                <label>Multa (R$)</label>
+                <input type="number" min={0} step="0.01" className="tabular" value={multa} onChange={(e) => setMulta(Number(e.target.value))} />
               </div>
             </div>
-            <div className="field">
+
+            <div className="field" style={{ marginBottom: 0 }}>
               <label>Pagamento Recebido (R$)</label>
-              <input type="number" min={0} step="0.01" value={pagamento} onChange={(e) => setPagamento(Number(e.target.value))} />
+              <input type="number" min={0} step="0.01" className="tabular" value={pagamento} onChange={(e) => setPagamento(Number(e.target.value))} />
             </div>
-            <div className="field">
+
+            <div className="field" style={{ marginBottom: 0 }}>
               <label>Saldo Anterior (R$)</label>
-              <input type="number" step="0.01" value={saldoAnterior} onChange={(e) => setSaldoAnterior(Number(e.target.value))} />
+              <input type="number" step="0.01" className="tabular" value={saldoAnterior} onChange={(e) => setSaldoAnterior(Number(e.target.value))} />
             </div>
-            <div style={{ background: 'var(--surface-alt)', padding: 12, borderRadius: 8, display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: 13 }}>
-              <div>Investimento Total: <strong>R$ {investimento.toFixed(2)}</strong></div>
-              <div>Saldo do Dia: <strong>R$ {saldoDia.toFixed(2)}</strong></div>
-              <div>Saldo Geral: <strong style={{ color: saldoGeral < 0 ? 'var(--danger)' : 'var(--primary)' }}>R$ {saldoGeral.toFixed(2)}</strong></div>
+
+            <div className="tabular" style={{ background: 'var(--surface-alt)', padding: '10px 14px', borderRadius: 8, display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: 13, gap: 2 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Investimento:</span> <strong>R$ {investimento.toFixed(2)}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Saldo do Dia:</span> <strong>R$ {saldoDia.toFixed(2)}</strong></div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Saldo Geral:</span> <strong style={{ color: saldoGeral < 0 ? 'var(--danger)' : 'var(--primary)' }}>R$ {saldoGeral.toFixed(2)}</strong></div>
             </div>
           </div>
         </div>

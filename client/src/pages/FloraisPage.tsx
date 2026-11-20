@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Flower2, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { api } from '../api';
+import { SearchHero } from '../components/SearchHero';
 
 interface Floral {
   id: number;
@@ -25,18 +26,19 @@ export function FloraisPage() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-        <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Flower2 size={22} color="var(--primary)" /> Florais ({florais.length})
-        </h2>
-        <input
-          type="search"
-          placeholder="Pesquisa (ex: Ansiedade, Medo, Insônia)..."
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          style={{ width: 340, maxWidth: '100%', fontWeight: 600 }}
-        />
+      <div className="page-header">
+        <div>
+          <h2 className="page-title">Florais</h2>
+          <span className="page-subtitle">Pesquise por emoção, sintoma ou floral e dê duplo clique para recomendar</span>
+        </div>
       </div>
+
+      <SearchHero
+        value={busca}
+        onChange={setBusca}
+        placeholder="Pesquisar floral, emoção ou indicação (ex: Ansiedade, Medo, Insônia)..."
+        countLabel={`${florais.length} florais`}
+      />
 
       {/* Layout espelhado do VB6: Esquerda = Queixas + Doenças | Direita = Lista + Recomendados */}
       <div className="grid-2" style={{ gridTemplateColumns: '1.2fr 0.8fr', alignItems: 'start' }}>
