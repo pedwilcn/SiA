@@ -48,6 +48,7 @@ export function HomePage({ selectedCliente, onSelectCliente, onStartAtendimento 
 
   const [dataAgenda, setDataAgenda] = useState(() => new Date().toISOString().slice(0, 10));
   const [slots, setSlots] = useState<AgendaSlot[]>([]);
+  const [histDatas, setHistDatas] = useState<Array<{ id: number; dataHora: string; queixas?: string }>>([]);
   const [msg, setMsg] = useState('');
 
   // Calculadora Financeira (equivalente ao Calc() de frm_início.frm)
@@ -84,6 +85,16 @@ export function HomePage({ selectedCliente, onSelectCliente, onStartAtendimento 
   useEffect(() => {
     void loadAgenda(dataAgenda);
   }, [dataAgenda]);
+
+  useEffect(() => {
+    if (!selectedCliente) {
+      setHistDatas([]);
+      return;
+    }
+    void api<Array<{ id: number; dataHora: string; queixas?: string }>>(
+      `/api/historico?paciente=${encodeURIComponent(selectedCliente.nome)}`
+    ).then(setHistDatas);
+  }, [selectedCliente?.id]);
 
   const handlePickCliente = (c: Cliente) => {
     onSelectCliente(c);
@@ -330,63 +341,92 @@ export function HomePage({ selectedCliente, onSelectCliente, onStartAtendimento 
         </div>
       </div>
 
-      {/* Financeiro da Sessão */}
-      <div className="card">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8, fontSize: 15 }}>
-            <DollarSign size={17} /> Controle Financeiro da Sessão
-          </h3>
-          {selectedCliente && (
-            <button
-              type="button"
-              className="btn"
-              onClick={() =>
-                generateAtendimentoPdf({
-                  paciente: selectedCliente.nome,
-                  dataHora: dataAgenda,
-                  financeiro: { investimento, pagamento, saldoDia, saldoGeral },
-                })
-              }
-            >
-              <FileText size={14} /> Gerar Recibo PDF
-            </button>
-          )}
+      {/* Financeiro da Sessão + Histórico de Atendimento do Paciente */}
+      <div className="grid-2" style={{ gridTemplateColumns: '1.35fr 0.65fr', alignItems: 'start' }}>
+        <div className="card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: 8, fontSize: 15 }}>
+              <DollarSign size={17} /> Controle Financeiro da Sessão
+            </h3>
+            {selectedCliente && (
+              <button
+                type="button"
+                className="btn"
+                onClick={() =>
+                  generateAtendimentoPdf({
+                    paciente: selectedCliente.nome,
+                    dataHora: dataAgenda,
+                    financeiro: { investimento, pagamento, saldoDia, saldoGeral },
+                  })
+                }
+              >
+                <FileText size={14} /> Gerar Recibo PDF
+              </button>
+            )}
+          </div>
+          <div className="grid-3">
+            <div className="field">
+              <label>Qtd. Sessões Acupuntura × Valor (R$)</label>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input type="number" min={0} value={qtdAcup} onChange={(e) => setQtdAcup(Number(e.target.value))} style={{ width: 70 }} />
+                <input type="number" min={0} step="0.01" value={valAcup} onChange={(e) => setValAcup(Number(e.target.value))} style={{ flex: 1 }} />
+              </div>
+            </div>
+            <div className="field">
+              <label>Qtd. Estética × Valor (R$)</label>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input type="number" min={0} value={qtdEst} onChange={(e) => setQtdEst(Number(e.target.value))} style={{ width: 70 }} />
+                <input type="number" min={0} step="0.01" value={valEst} onChange={(e) => setValEst(Number(e.target.value))} style={{ flex: 1 }} />
+              </div>
+            </div>
+            <div className="field">
+              <label>Florais + Frete + Multa (R$)</label>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <input type="number" min={0} step="0.01" value={valFlorais} onChange={(e) => setValFlorais(Number(e.target.value))} placeholder="Florais" />
+                <input type="number" min={0} step="0.01" value={frete} onChange={(e) => setFrete(Number(e.target.value))} placeholder="Frete" />
+                <input type="number" min={0} step="0.01" value={multa} onChange={(e) => setMulta(Number(e.target.value))} placeholder="Multa" />
+              </div>
+            </div>
+            <div className="field">
+              <label>Pagamento Recebido (R$)</label>
+              <input type="number" min={0} step="0.01" value={pagamento} onChange={(e) => setPagamento(Number(e.target.value))} />
+            </div>
+            <div className="field">
+              <label>Saldo Anterior (R$)</label>
+              <input type="number" step="0.01" value={saldoAnterior} onChange={(e) => setSaldoAnterior(Number(e.target.value))} />
+            </div>
+            <div style={{ background: 'var(--surface-alt)', padding: 12, borderRadius: 8, display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: 13 }}>
+              <div>Investimento Total: <strong>R$ {investimento.toFixed(2)}</strong></div>
+              <div>Saldo do Dia: <strong>R$ {saldoDia.toFixed(2)}</strong></div>
+              <div>Saldo Geral: <strong style={{ color: saldoGeral < 0 ? 'var(--danger)' : 'var(--primary)' }}>R$ {saldoGeral.toFixed(2)}</strong></div>
+            </div>
+          </div>
         </div>
-        <div className="grid-3">
-          <div className="field">
-            <label>Qtd. Sessões Acupuntura × Valor (R$)</label>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <input type="number" min={0} value={qtdAcup} onChange={(e) => setQtdAcup(Number(e.target.value))} style={{ width: 80 }} />
-              <input type="number" min={0} step="0.01" value={valAcup} onChange={(e) => setValAcup(Number(e.target.value))} style={{ flex: 1 }} />
-            </div>
-          </div>
-          <div className="field">
-            <label>Qtd. Estética × Valor (R$)</label>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <input type="number" min={0} value={qtdEst} onChange={(e) => setQtdEst(Number(e.target.value))} style={{ width: 80 }} />
-              <input type="number" min={0} step="0.01" value={valEst} onChange={(e) => setValEst(Number(e.target.value))} style={{ flex: 1 }} />
-            </div>
-          </div>
-          <div className="field">
-            <label>Florais + Frete + Multa (R$)</label>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <input type="number" min={0} step="0.01" value={valFlorais} onChange={(e) => setValFlorais(Number(e.target.value))} placeholder="Florais" />
-              <input type="number" min={0} step="0.01" value={frete} onChange={(e) => setFrete(Number(e.target.value))} placeholder="Frete" />
-              <input type="number" min={0} step="0.01" value={multa} onChange={(e) => setMulta(Number(e.target.value))} placeholder="Multa" />
-            </div>
-          </div>
-          <div className="field">
-            <label>Pagamento Recebido (R$)</label>
-            <input type="number" min={0} step="0.01" value={pagamento} onChange={(e) => setPagamento(Number(e.target.value))} />
-          </div>
-          <div className="field">
-            <label>Saldo Anterior (R$)</label>
-            <input type="number" step="0.01" value={saldoAnterior} onChange={(e) => setSaldoAnterior(Number(e.target.value))} />
-          </div>
-          <div style={{ background: 'var(--surface-alt)', padding: 12, borderRadius: 8, display: 'flex', flexDirection: 'column', justifyContent: 'center', fontSize: 13 }}>
-            <div>Investimento Total: <strong>R$ {investimento.toFixed(2)}</strong></div>
-            <div>Saldo do Dia: <strong>R$ {saldoDia.toFixed(2)}</strong></div>
-            <div>Saldo Geral: <strong style={{ color: saldoGeral < 0 ? 'var(--danger)' : 'var(--primary)' }}>R$ {saldoGeral.toFixed(2)}</strong></div>
+
+        <div className="card">
+          <h3 style={{ marginTop: 0, fontSize: 15 }}>Histórico de Atendimento</h3>
+          <div className="list-scroll" style={{ maxHeight: 190 }}>
+            {histDatas.length === 0 ? (
+              <div style={{ padding: 14, fontSize: 12, color: 'var(--text-muted)' }}>
+                {selectedCliente ? 'Sem atendimentos registrados.' : 'Selecione um paciente para ver as datas.'}
+              </div>
+            ) : (
+              histDatas.map((h) => (
+                <div
+                  key={h.id}
+                  className="list-item"
+                  onClick={() => selectedCliente && onStartAtendimento(selectedCliente)}
+                  title="Clique para abrir o prontuário"
+                >
+                  <div>{h.dataHora}</div>
+                  {h.queixas && (
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {h.queixas}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
