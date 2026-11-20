@@ -1,0 +1,14 @@
+# Dependencies & build artifacts
+node_modules/
+dist/
+
+# LGPD: Never commit patient databases or raw exported JSONs
+data/
+*.db
+*.db-wal
+*.db-shm
+scripts/exported_json/
+
+# Local environment & logs
+.env
+*.log
