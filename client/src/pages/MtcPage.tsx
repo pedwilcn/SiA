@@ -274,16 +274,20 @@ export function MtcPage() {
             <div
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))',
-                gap: 4,
-                maxHeight: 170,
+                gridTemplateColumns:
+                  tab === 'sistemicos' && !apenasProtocolos || tab === 'koryo' || tab === 'ventosas'
+                    ? 'repeat(auto-fill, minmax(96px, 1fr))'
+                    : 'repeat(auto-fill, minmax(185px, 1fr))',
+                gridAutoRows: 'min-content',
+                alignContent: 'start',
+                gap: 6,
+                height: 220,
                 overflowY: 'auto',
-                padding: 6,
+                padding: 8,
                 border: '1px solid var(--border)',
                 borderRadius: 8,
                 background: 'var(--surface-alt)',
               }}
-              title="Clique para visualizar | Duplo clique para adicionar aos pontos escolhidos"
             >
               {activeList.map((item) => {
                 const title = getItemTitle(item);
@@ -294,12 +298,15 @@ export function MtcPage() {
                     type="button"
                     onClick={() => setSelected(item)}
                     onDoubleClick={() => handleToggleEscolhido(title)}
+                    title={title}
                     style={{
                       textAlign: 'left',
-                      padding: '5px 8px',
+                      padding: '6px 10px',
+                      minHeight: 32,
+                      lineHeight: 1.3,
                       borderRadius: 6,
-                      border: '1px solid transparent',
-                      fontSize: 12,
+                      border: isSel ? '1px solid var(--primary)' : '1px solid var(--border)',
+                      fontSize: 13,
                       fontWeight: isSel ? 700 : 500,
                       background: isSel ? 'var(--primary)' : 'var(--surface)',
                       color: isSel ? '#fff' : 'var(--text)',
