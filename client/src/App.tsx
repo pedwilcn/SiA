@@ -89,6 +89,7 @@ export function App() {
           <HomePage
             selectedCliente={selectedCliente}
             onSelectCliente={setSelectedCliente}
+            onNavigate={(target) => setPage(target)}
             onStartAtendimento={(c) => {
               setSelectedCliente(c);
               setPage('historico');
